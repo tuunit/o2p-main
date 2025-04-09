@@ -47,6 +47,18 @@ jobs:
             echo "mode=default" >> $GITHUB_OUTPUT
           fi
 
+      - name: Create initial E2E test comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ github.event.issue.number }},
+              body: "⏳ E2E tests are running... [View progress](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+            });
+            core.setOutput('comment_id', comment.data.id);
+
       - name: Checkout e2e repo (main)
         if: steps.parse-comment.outputs.mode == 'default'
         uses: actions/checkout@v4
@@ -72,3 +84,49 @@ jobs:
 
       - name: E2E Testing
         run: ./e2e-repo/test.sh
+        continue-on-error: true
+        id: e2e-test
+
+      - name: Update PR with E2E test results
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { status } = steps.e2e-test;
+            const success = status === 0;
+            const label = success ? 'e2e/successful' : 'e2e/failed';
+            const emoji = success ? '✅' : '❌';
+
+            // Update comment
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: ${{ steps.create-comment.outputs.comment_id }},
+              body: `${emoji} E2E tests ${success ? 'passed' : 'failed'} [View details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})`
+            });
+
+            // Add label
+            try {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: ${{ github.event.issue.number }},
+                labels: [label]
+              });
+              
+              // Remove opposite label if it exists
+              const oppositeLabel = success ? 'e2e/failed' : 'e2e/successful';
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: ${{ github.event.issue.number }},
+                name: oppositeLabel
+              }).catch(() => {}); // Ignore if label doesn't exist
+            } catch (error) {
+              core.warning(`Failed to update labels: ${error}`);
+            }
+
+            // Fail the job if tests failed
+            if (!success) {
+              core.setFailed('E2E tests failed');
+            }
