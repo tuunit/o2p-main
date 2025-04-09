@@ -93,12 +93,6 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            await github.rest.issues.deleteComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              comment_id: "${{ steps.comment.outputs.comment_id }}",
-            });
-              
             const { data: pr } = await github.rest.pulls.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -113,8 +107,14 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: ${{ github.event.issue.number }},
-              event: success ? 'APPROVE' : 'REQUEST_CHANGES',
+              event: success ? 'DISMISS' : 'REQUEST_CHANGES',
               body: `${icon} E2E tests ${success ? 'passed' : 'failed'} [View details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})`
+            });
+
+            await github.rest.issues.deleteComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: "${{ steps.comment.outputs.comment_id }}",
             });
 
             try {
