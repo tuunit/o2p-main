@@ -113,7 +113,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: ${{ github.event.issue.number }},
-              event: "REQUEST_CHANGES",
+              event: success ? 'APPROVE' : 'REQUEST_CHANGES',
               body: `${icon} E2E tests ${success ? 'passed' : 'failed'} [View details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})`
             });
 
