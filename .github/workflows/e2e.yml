@@ -95,14 +95,14 @@ jobs:
           script: |
             const success = "${{ steps.e2e-test.outcome }}" === 'success';
             const label = success ? 'e2e/successful' : 'e2e/failed';
-            const emoji = success ? '✅' : '❌';
+            const icon = success ? '✅' : '❌';
 
             // Update comment
             await github.rest.issues.updateComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               comment_id: "${{ steps.comment.outputs.comment_id }}",
-              body: `${emoji} E2E tests ${success ? 'passed' : 'failed'} [View details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})`
+              body: `${icon} E2E tests ${success ? 'passed' : 'failed'} [View details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})`
             });
 
             // Add label
@@ -121,7 +121,9 @@ jobs:
                 repo: context.repo.repo,
                 issue_number: ${{ github.event.issue.number }},
                 name: oppositeLabel
-              }).catch(() => {}); // Ignore if label doesn't exist
+              }).catch(() => {
+                // Ignore if label doesn't exist
+              });
             } catch (error) {
               core.warning(`Failed to update labels: ${error}`);
             }
