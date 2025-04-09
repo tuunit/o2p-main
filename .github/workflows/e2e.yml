@@ -18,11 +18,10 @@ jobs:
        github.event.comment.author_association == 'OWNER') &&
       startsWith(github.event.comment.body, '/e2e')
     steps:
-      - name: Checkout PR code
-        uses: actions/checkout@v4
+      - name: Checkout PR
+        uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.issue.pull_request.head.sha }}
-          repository: ${{ github.event.issue.pull_request.head.repo.full_name }}
+          ref: refs/pull/${{ github.event.issue.number }}/merge
 
       - name: Print full PR object
         run: |
