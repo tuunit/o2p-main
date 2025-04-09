@@ -19,7 +19,7 @@ jobs:
       startsWith(github.event.comment.body, '/e2e')
     steps:
       - name: Checkout PR
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: refs/pull/${{ github.event.issue.number }}/merge
 
@@ -68,11 +68,10 @@ jobs:
 
       - name: Clone e2e repo (PR)
         if: steps.parse-comment.outputs.mode == 'pr'
-        run: |
-          git clone https://github.com/tuunit/e2e-repo.git
-          cd e2e-repo
-          git fetch origin pull/${{ steps.parse-comment.outputs.pr_number }}/head:pr-${{ steps.parse-comment.outputs.pr_number }}
-          git checkout pr-${{ steps.parse-comment.outputs.pr_number }}
+        uses: actions/checkout@v4
+        with:
+          repository: tuunit/e2e-repo
+          ref: refs/pull/${{ steps.parse-comment.outputs.pr_number }}/merge
 
       - name: E2E Testing
         run: ./e2e-repo/test.sh
