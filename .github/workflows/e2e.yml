@@ -5,7 +5,7 @@ on:
 
 jobs:
   e2e:
-    runs-on: ubuntu
+    runs-on: ubuntu-latest
     # https://docs.github.com/en/graphql/reference/enums#commentauthorassociation
     if: |
       github.event.issue.pull_request && 
