@@ -1,0 +1,26 @@
+name: PR Comment Command
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  e2e:
+    runs-on: ubuntu
+    if: github.event.issue.pull_request && github.event.comment.author_association == 'MEMBER'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build
+        run: go build -o main
+
+      - name: Checkout e2e repo
+        run: git clone https://github.com/tuunit/e2e-repo.git
+
+      - name: E2E Testing
+        run: ./e2e-repo/test.sh
