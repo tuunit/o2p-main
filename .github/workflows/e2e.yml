@@ -130,5 +130,20 @@ jobs:
 
             // Fail the job if tests failed
             if (!success) {
+              
+              const { data: pr } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: ${{ github.event.issue.number }},
+              });
+              
+              await github.rest.pulls.createReview({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: ${{ github.event.issue.number }},
+                event: "REQUEST_CHANGES",
+                body: "❌ E2E tests failed! Please fix before merging.",
+              });
+
               core.setFailed('E2E tests failed');
             }
