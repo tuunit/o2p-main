@@ -6,7 +6,11 @@ on:
 jobs:
   e2e:
     runs-on: ubuntu
-    if: github.event.issue.pull_request && github.event.comment.author_association == 'MEMBER'
+    # https://docs.github.com/en/graphql/reference/enums#commentauthorassociation
+    if: |
+      github.event.issue.pull_request && 
+      (github.event.comment.author_association == 'MEMBER' ||
+       github.event.comment.author_association == 'OWNER')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
