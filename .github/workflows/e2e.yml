@@ -18,6 +18,19 @@ jobs:
        github.event.comment.author_association == 'OWNER') &&
       startsWith(github.event.comment.body, '/e2e')
     steps:
+      - name: Create initial E2E test comment
+        uses: actions/github-script@v7
+        id: comment
+        with:
+          script: |
+            const comment = await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ github.event.issue.number }},
+              body: "⏳ E2E tests are running... [View progress](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+            });
+            core.setOutput('comment_id', comment.data.id);
+
       - name: Checkout PR
         uses: actions/checkout@v4
         with:
@@ -46,18 +59,6 @@ jobs:
           else
             echo "mode=default" >> $GITHUB_OUTPUT
           fi
-
-      - name: Create initial E2E test comment
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const comment = await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: ${{ github.event.issue.number }},
-              body: "⏳ E2E tests are running... [View progress](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
-            });
-            core.setOutput('comment_id', comment.data.id);
 
       - name: Checkout e2e repo (main)
         if: steps.parse-comment.outputs.mode == 'default'
@@ -101,7 +102,7 @@ jobs:
             await github.rest.issues.updateComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              comment_id: ${{ steps.create-comment.outputs.comment_id }},
+              comment_id: "${{ steps.comment.outputs.comment_id }}",
               body: `${emoji} E2E tests ${success ? 'passed' : 'failed'} [View details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})`
             });
 
