@@ -10,7 +10,8 @@ jobs:
     if: |
       github.event.issue.pull_request && 
       (github.event.comment.author_association == 'MEMBER' ||
-       github.event.comment.author_association == 'OWNER')
+       github.event.comment.author_association == 'OWNER') &&
+      contains(github.event.comment.body, '/e2e')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
