@@ -21,7 +21,11 @@ jobs:
 
       - name: Print PR branch name
         run: |
-          echo "Checked out PR branch: ${{ github.event.issue.pull_request.head.ref }}"
+          echo "PR: ${{ github.event.issue.pull_request }}"
+          echo "HEAD: ${{ github.event.issue.pull_request.head }}"
+          echo "SHA: ${{ github.event.issue.pull_request.head.sha }}"
+          echo "Name: ${{ github.event.issue.pull_request.head.full_name }}"
+          echo "Ref: ${{ github.event.issue.pull_request.head.ref }}"
 
       - name: Set up Go
         uses: actions/setup-go@v5
