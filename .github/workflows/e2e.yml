@@ -93,19 +93,30 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            await github.rest.issues.deleteComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: "${{ steps.comment.outputs.comment_id }}",
+            });
+              
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: ${{ github.event.issue.number }}
+            });
+
             const success = "${{ steps.e2e-test.outcome }}" === 'success';
             const label = success ? 'e2e/successful' : 'e2e/failed';
             const icon = success ? '✅' : '❌';
 
-            // Update comment
-            await github.rest.issues.updateComment({
+            await github.rest.pulls.createReview({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              comment_id: "${{ steps.comment.outputs.comment_id }}",
+              pull_number: ${{ github.event.issue.number }},
+              event: "REQUEST_CHANGES",
               body: `${icon} E2E tests ${success ? 'passed' : 'failed'} [View details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})`
             });
 
-            // Add label
             try {
               await github.rest.issues.addLabels({
                 owner: context.repo.owner,
@@ -114,7 +125,6 @@ jobs:
                 labels: [label]
               });
               
-              // Remove opposite label if it exists
               const oppositeLabel = success ? 'e2e/failed' : 'e2e/successful';
               await github.rest.issues.removeLabel({
                 owner: context.repo.owner,
@@ -130,20 +140,5 @@ jobs:
 
             // Fail the job if tests failed
             if (!success) {
-              
-              const { data: pr } = await github.rest.pulls.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: ${{ github.event.issue.number }},
-              });
-              
-              await github.rest.pulls.createReview({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: ${{ github.event.issue.number }},
-                event: "REQUEST_CHANGES",
-                body: "❌ E2E tests failed! Please fix before merging.",
-              });
-
               core.setFailed('E2E tests failed');
             }
