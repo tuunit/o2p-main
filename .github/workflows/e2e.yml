@@ -24,13 +24,13 @@ jobs:
           ref: ${{ github.event.issue.pull_request.head.sha }}
           repository: ${{ github.event.issue.pull_request.head.repo.full_name }}
 
-      - name: Print PR branch name
+      - name: Print full PR object
         run: |
-          echo "PR: ${{ github.event.issue.pull_request }}"
-          echo "HEAD: ${{ github.event.issue.pull_request.head }}"
-          echo "SHA: ${{ github.event.issue.pull_request.head.sha }}"
-          echo "Name: ${{ github.event.issue.pull_request.head.full_name }}"
-          echo "Ref: ${{ github.event.issue.pull_request.head.ref }}"
+          echo "Full PR object:"
+          echo '${{ toJSON(github.event.issue.pull_request) }}'
+          echo ""
+          echo "GitHub context:"
+          echo '${{ toJSON(github) }}'
 
       - name: Set up Go
         uses: actions/setup-go@v5
