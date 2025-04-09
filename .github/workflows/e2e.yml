@@ -23,14 +23,6 @@ jobs:
         with:
           ref: refs/pull/${{ github.event.issue.number }}/merge
 
-      - name: Print full PR object
-        run: |
-          echo "Full PR object:"
-          echo '${{ toJSON(github.event.issue.pull_request) }}'
-          echo ""
-          echo "GitHub context:"
-          echo '${{ toJSON(github) }}'
-
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
@@ -43,8 +35,8 @@ jobs:
         id: parse-comment
         run: |
           COMMENT="${{ github.event.comment.body }}"
-          if [[ "$COMMENT" == "/e2e PR-"* ]]; then
-            PR_NUMBER=${COMMENT//[!0-9]/}
+          if [[ "$COMMENT" == "/e2e PR-"* && "$COMMENT" =~ PR-([0-9]+) ]]; then
+            PR_NUMBER="${BASH_REMATCH[1]}"
             echo "mode=pr" >> $GITHUB_OUTPUT
             echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
           elif [[ "$COMMENT" == "/e2e "* ]]; then
@@ -57,14 +49,16 @@ jobs:
 
       - name: Checkout e2e repo (main)
         if: steps.parse-comment.outputs.mode == 'default'
-        run: |
-          git clone https://github.com/tuunit/e2e-repo.git
+        uses: actions/checkout@v4
+        with:
+          repository: tuunit/e2e-repo
 
       - name: Checkout e2e repo (branch)
         if: steps.parse-comment.outputs.mode == 'branch'
-        run: |
-          git clone --branch ${{ steps.parse-comment.outputs.branch }} \
-            https://github.com/tuunit/e2e-repo.git
+        uses: actions/checkout@v4
+        with:
+          repository: tuunit/e2e-repo
+          ref: ${{ steps.parse-comment.outputs.branch }}
 
       - name: Clone e2e repo (PR)
         if: steps.parse-comment.outputs.mode == 'pr'
