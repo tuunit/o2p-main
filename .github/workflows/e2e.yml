@@ -13,11 +13,15 @@ jobs:
        github.event.comment.author_association == 'OWNER') &&
       startsWith(github.event.comment.body, '/e2e')
     steps:
-      - name: Checkout PR
+      - name: Checkout PR code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.issue.pull_request.base.sha }}
-          repository: ${{ github.event.issue.pull_request.base.repo.full_name }}
+          ref: ${{ github.event.issue.pull_request.head.sha }}
+          repository: ${{ github.event.issue.pull_request.head.repo.full_name }}
+
+      - name: Print PR branch name
+        run: |
+          echo "Checked out PR branch: ${{ github.event.issue.pull_request.head.ref }}"
 
       - name: Set up Go
         uses: actions/setup-go@v5
