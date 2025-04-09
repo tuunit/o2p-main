@@ -52,6 +52,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: tuunit/e2e-repo
+          path: e2e-repo
 
       - name: Checkout e2e repo (branch)
         if: steps.parse-comment.outputs.mode == 'branch'
@@ -59,6 +60,7 @@ jobs:
         with:
           repository: tuunit/e2e-repo
           ref: ${{ steps.parse-comment.outputs.branch }}
+          path: e2e-repo
 
       - name: Clone e2e repo (PR)
         if: steps.parse-comment.outputs.mode == 'pr'
@@ -66,6 +68,7 @@ jobs:
         with:
           repository: tuunit/e2e-repo
           ref: refs/pull/${{ steps.parse-comment.outputs.pr_number }}/merge
+          path: e2e-repo
 
       - name: E2E Testing
         run: ./e2e-repo/test.sh
