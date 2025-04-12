@@ -104,12 +104,12 @@ jobs:
             const label = success ? 'e2e/successful' : 'e2e/failed';
 
             if (success) {
-              await github.rest.pulls.updateReview({
+              await github.rest.pulls.dismissReview({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pull_number: ${{ github.event.issue.number }},
                 review_id: "${{ steps.review.outputs.review_id }}",
-                body: "✅ E2E tests passed [View details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+                message: "✅ E2E tests passed [View details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
               });
             } else {
               await github.rest.pulls.createReview({
