@@ -115,7 +115,7 @@ jobs:
               await github.rest.pulls.updateReview({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                pull_number: context.issue.number,
+                pull_number: ${{ github.event.issue.number }},
                 body: "❌ E2E tests failed [View details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})",
                 event: "REQUEST_CHANGES"
               });
