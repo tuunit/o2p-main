@@ -27,7 +27,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pull_number: ${{ github.event.issue.number }},
-                event: 'COMMENT',
+                event: 'REQUEST_CHANGES',
                 body: "⏳ E2E tests are running... [View progress](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
               });
             core.setOutput('review_id', review.data.id);
@@ -112,7 +112,7 @@ jobs:
                 message: "✅ E2E tests passed [View details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
               });
             } else {
-              await github.rest.pulls.createReview({
+              await github.rest.pulls.updateReview({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pull_number: context.issue.number,
