@@ -117,7 +117,6 @@ jobs:
                 repo: context.repo.repo,
                 pull_number: ${{ github.event.issue.number }},
                 body: "❌ E2E tests failed [View details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})",
-                event: "REQUEST_CHANGES"
               });
             }
 
